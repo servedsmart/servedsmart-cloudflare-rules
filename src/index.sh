@@ -346,7 +346,7 @@ if [[ -z "${RULES_LIST_ID}" ]]; then
         echo "ERROR: Cloudflare API Request unsuccessful. POST https://api.cloudflare.com/client/v4/accounts/CLOUDFLARE_ACCOUNT_ID/rules/lists failed."
         exit 1
     fi
-    RULES_LIST_ID="$(jq -r '.result[] | .id' <<<"${RESPONSE}")"
+    RULES_LIST_ID="$(jq -r '.result.id' <<<"${RESPONSE}")"
     echo "Cloudflare API Request successful. POST https://api.cloudflare.com/client/v4/accounts/CLOUDFLARE_ACCOUNT_ID/rules/lists succeeded."
 fi
 ## Update list
@@ -356,7 +356,7 @@ if ! jq -e ".success" <<<"${RESPONSE}" >/dev/null 2>&1; then
     exit 1
 fi
 echo "Cloudflare API Request successful. PUT https://api.cloudflare.com/client/v4/accounts/CLOUDFLARE_ACCOUNT_ID/rules/lists/RULES_LIST_ID/items succeeded."
-OPERATION_ID="$(jq -r '.result[] | .operation_id' <<<"${RESPONSE}")"
+OPERATION_ID="$(jq -r '.result.operation_id' <<<"${RESPONSE}")"
 for i in {1..11}; do
     if [[ "${i}" -eq 11 ]]; then
         echo "ERROR: Cloudflare API Bulk Operation querying timed out. Initialized by PUT https://api.cloudflare.com/client/v4/accounts/CLOUDFLARE_ACCOUNT_ID/rules/lists/RULES_LIST_ID/items."
@@ -364,7 +364,7 @@ for i in {1..11}; do
     fi
     sleep 10
     RESPONSE="$(curl -s https://api.cloudflare.com/client/v4/accounts/"${CLOUDFLARE_ACCOUNT_ID}"/rules/lists/bulk_operations/"${OPERATION_ID}" -X GET -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")"
-    if [[ "$(jq -r '.result[] | .status' <<<"${RESPONSE}")" == "completed" ]]; then
+    if [[ "$(jq -r '.result.status' <<<"${RESPONSE}")" == "completed" ]]; then
         echo "Cloudflare API Bulk Operation successful. Initialized by PUT https://api.cloudflare.com/client/v4/accounts/CLOUDFLARE_ACCOUNT_ID/rules/lists/RULES_LIST_ID/items."
         break
     else
