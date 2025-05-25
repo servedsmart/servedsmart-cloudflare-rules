@@ -299,10 +299,10 @@ JSON_REDIRECT_RULESET="$(
       "action_parameters": {
         "from_value": {
           "target_url": {
-            "expression": "concat(\"https://${TARGET_DOMAIN}\", http.request.uri.path)",
-            "status_code": 301,
-            "preserve_query_string": true
+            "expression": "concat(\"https://${TARGET_DOMAIN}\", http.request.uri.path)"
           }
+          "status_code": 301,
+          "preserve_query_string": true
         }
       }
     }
