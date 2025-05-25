@@ -349,6 +349,7 @@ for ((i = 0; i < EXTERNAL_REDIRECT_DOMAINS_LENGTH; i++)); do
         RESPONSE="$(curl -s https://api.cloudflare.com/client/v4/zones/"${CLOUDFLARE_ZONE_ID_EXTERNAL}"/rulesets -X POST -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" --json "${JSON_REDIRECT_RULESET_EXTERNAL}")"
         if ! jq -e ".success" <<<"${RESPONSE}" >/dev/null 2>&1; then
             echo "ERROR: Cloudflare API Request unsuccessful. POST https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE_ID_EXTERNAL/rulesets failed."
+            echo "DEBUG: ${RESPONSE}"
             exit 1
         fi
         echo "Cloudflare API Request successful. POST https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE_ID_EXTERNAL/rulesets succeeded."
