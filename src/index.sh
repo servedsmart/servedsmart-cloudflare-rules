@@ -330,7 +330,7 @@ fi
 ## Process external zone ids
 for ((i = 0; i < EXTERNAL_REDIRECT_DOMAINS_LENGTH; i++)); do
     CLOUDFLARE_ZONE_ID_EXTERNAL="$(jq -r --arg secret "${CLOUDFLARE_ZONE_ID_SECRET_NAMES[${i}]}" '.[$secret]' <<<"$JSON_SECRETS")"
-    JSON_REDIRECT_RULESET_EXTERNAL="$(jq -c --arg domain0 "${EXTERNAL_REDIRECT_DOMAINS[${i}]}" --arg domain1 "www.${EXTERNAL_REDIRECT_DOMAINS[${i}]}" '.rules[0].expression = "(http.host eq $domain0) or (http.host eq $domain1)"' <<<"${JSON_REDIRECT_RULESET}")"
+    JSON_REDIRECT_RULESET_EXTERNAL="$(jq -c --arg expression "(http.host eq ${EXTERNAL_REDIRECT_DOMAINS[${i}]}) or (http.host eq www.${EXTERNAL_REDIRECT_DOMAINS[${i}]})" '.rules[0].expression = $expression' <<<"${JSON_REDIRECT_RULESET}")"
     ### Check if ruleset exists and either update or create ruleset
     API_LIST_RULESETS_ZONE_EXTERNAL="$(curl -s https://api.cloudflare.com/client/v4/zones/"${CLOUDFLARE_ZONE_ID_EXTERNAL}"/rulesets -X GET -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")"
     if ! jq -e ".success" <<<"${API_LIST_RULESETS_ZONE_EXTERNAL}" >/dev/null 2>&1; then
@@ -349,7 +349,6 @@ for ((i = 0; i < EXTERNAL_REDIRECT_DOMAINS_LENGTH; i++)); do
         RESPONSE="$(curl -s https://api.cloudflare.com/client/v4/zones/"${CLOUDFLARE_ZONE_ID_EXTERNAL}"/rulesets -X POST -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" --json "${JSON_REDIRECT_RULESET_EXTERNAL}")"
         if ! jq -e ".success" <<<"${RESPONSE}" >/dev/null 2>&1; then
             echo "ERROR: Cloudflare API Request unsuccessful. POST https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE_ID_EXTERNAL/rulesets failed."
-            echo "DEBUG: ${RESPONSE}"
             exit 1
         fi
         echo "Cloudflare API Request successful. POST https://api.cloudflare.com/client/v4/zones/CLOUDFLARE_ZONE_ID_EXTERNAL/rulesets succeeded."
